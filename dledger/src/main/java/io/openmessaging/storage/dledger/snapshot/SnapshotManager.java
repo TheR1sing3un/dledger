@@ -24,6 +24,7 @@ import io.openmessaging.storage.dledger.protocol.DLedgerResponseCode;
 import io.openmessaging.storage.dledger.snapshot.file.FileSnapshotStore;
 import io.openmessaging.storage.dledger.snapshot.hook.LoadSnapshotHook;
 import io.openmessaging.storage.dledger.snapshot.hook.SaveSnapshotHook;
+import io.openmessaging.storage.dledger.snapshot.strategy.SnapshotTriggerStrategy;
 import io.openmessaging.storage.dledger.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-public class SnapshotManager {
+public class SnapshotManager implements SnapshotTriggerStrategy {
 
     private static Logger logger = LoggerFactory.getLogger(SnapshotManager.class);
 
@@ -43,8 +44,9 @@ public class SnapshotManager {
     public static final String SNAPSHOT_TEMP_DIR = "tmp";
 
     private DLedgerServer dLedgerServer;
-    private long lastSnapshotIndex;
-    private long lastSnapshotTerm;
+
+    private final SnapshotTriggerStrategy snapshotTriggerStrategy;
+
     private final SnapshotStore snapshotStore;
     private volatile boolean savingSnapshot;
     private volatile boolean loadingSnapshot;
@@ -52,6 +54,7 @@ public class SnapshotManager {
     public SnapshotManager(DLedgerServer dLedgerServer) {
         this.dLedgerServer = dLedgerServer;
         this.snapshotStore = new FileSnapshotStore(this.dLedgerServer.getDLedgerConfig().getSnapshotStoreBaseDir());
+        this.snapshotTriggerStrategy = this.dLedgerServer.getDLedgerConfig().getSnapshotTriggerStrategy();
     }
 
     public boolean isSavingSnapshot() {
@@ -60,6 +63,21 @@ public class SnapshotManager {
 
     public boolean isLoadingSnapshot() {
         return loadingSnapshot;
+    }
+
+    @Override
+    public void loadStateWhenCommit(DLedgerEntry dLedgerEntry) {
+        this.snapshotTriggerStrategy.loadStateWhenCommit(dLedgerEntry);
+    }
+
+    @Override
+    public void loadStateWhenSnapshotUpdate(SnapshotMeta snapshotMeta) {
+        this.snapshotTriggerStrategy.loadStateWhenSnapshotUpdate(snapshotMeta);
+    }
+
+    @Override
+    public boolean triggerSnapshot(DLedgerEntry dLedgerEntry) {
+        return this.snapshotTriggerStrategy.triggerSnapshot(dLedgerEntry);
     }
 
     private class SaveSnapshotAfterHook implements SaveSnapshotHook {
@@ -125,8 +143,8 @@ public class SnapshotManager {
         if (this.savingSnapshot) {
             return;
         }
-        // Check if applied index reaching the snapshot threshold
-        if (dLedgerEntry.getIndex() - this.lastSnapshotIndex <= this.dLedgerServer.getDLedgerConfig().getSnapshotThreshold()) {
+        // Check if it should trigger snapshot process
+        if (!triggerSnapshot(dLedgerEntry)) {
             return;
         }
         // Create snapshot writer
@@ -157,8 +175,7 @@ public class SnapshotManager {
             res = SnapshotStatus.FAIL.getCode();
         }
         if (res == SnapshotStatus.SUCCESS.getCode()) {
-            this.lastSnapshotIndex = snapshotMeta.getLastIncludedIndex();
-            this.lastSnapshotTerm = snapshotMeta.getLastIncludedTerm();
+            loadStateWhenSnapshotUpdate(snapshotMeta);
             logger.info("Snapshot {} saved successfully", snapshotMeta);
             // Remove previous logs
             CompletableFuture.runAsync(() -> {
@@ -218,8 +235,7 @@ public class SnapshotManager {
 
     private void loadSnapshotAfter(SnapshotReader reader, SnapshotMeta snapshotMeta, SnapshotStatus status) {
         if (status.getCode() == SnapshotStatus.SUCCESS.getCode()) {
-            this.lastSnapshotIndex = snapshotMeta.getLastIncludedIndex();
-            this.lastSnapshotTerm = snapshotMeta.getLastIncludedTerm();
+            this.loadStateWhenSnapshotUpdate(snapshotMeta);
             this.loadingSnapshot = false;
             logger.info("Snapshot {} loaded successfully", snapshotMeta);
         } else {

@@ -170,19 +170,20 @@ public class StateMachineCaller extends ServiceThread {
         if (this.error != null) {
             return;
         }
+        // if committed task has been expired, ignore it
+        final long lastAppliedIndex = this.lastAppliedIndex.get();
+        if (lastAppliedIndex >= committedIndex) {
+            return;
+        }
         if (this.snapshotManager.isLoadingSnapshot()) {
             this.scheduledExecutorService.schedule(() -> {
                 try {
                     onCommitted(committedIndex);
                     logger.info("Still loading snapshot, retry the commit task later");
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    logger.error("Retry to commit the task in index = {} failed", committedIndex, e);
                 }
             }, RETRY_ON_COMMITTED_DELAY, TimeUnit.MILLISECONDS);
-            return;
-        }
-        final long lastAppliedIndex = this.lastAppliedIndex.get();
-        if (lastAppliedIndex >= committedIndex) {
             return;
         }
         final CommittedEntryIterator iter = new CommittedEntryIterator(this.dLedgerStore, committedIndex, this.applyingIndex, lastAppliedIndex, this.completeEntryCallback);
@@ -195,6 +196,7 @@ public class StateMachineCaller extends ServiceThread {
         if (dLedgerEntry != null) {
             this.lastAppliedTerm = dLedgerEntry.getTerm();
         }
+        this.snapshotManager.loadStateWhenCommit(dLedgerEntry);
         // Take snapshot
         snapshotManager.saveSnapshot(dLedgerEntry);
         // Check response timeout.

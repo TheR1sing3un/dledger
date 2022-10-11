@@ -16,6 +16,8 @@
 
 package io.openmessaging.storage.dledger;
 
+import io.openmessaging.storage.dledger.snapshot.strategy.SnapshotTriggerStrategy;
+import io.openmessaging.storage.dledger.snapshot.strategy.impl.EntryNumSnapshotTriggerStrategy;
 import io.openmessaging.storage.dledger.store.file.DLedgerMmapFileStore;
 
 import io.openmessaging.storage.dledger.utils.DLedgerUtils;
@@ -93,6 +95,8 @@ public class DLedgerConfig {
 
     private int snapshotThreshold = 1000;
     private int maxSnapshotReservedNum = 3;
+
+    private SnapshotTriggerStrategy snapshotTriggerStrategy = EntryNumSnapshotTriggerStrategy.of(snapshotThreshold);
 
     public String getDefaultPath() {
         return storeBaseDir + File.separator + "dledger-" + selfId;
@@ -484,5 +488,13 @@ public class DLedgerConfig {
 
     public void setMaxSnapshotReservedNum(int maxSnapshotReservedNum) {
         this.maxSnapshotReservedNum = maxSnapshotReservedNum;
+    }
+
+    public void setSnapshotTriggerStrategy(SnapshotTriggerStrategy snapshotTriggerStrategy) {
+        this.snapshotTriggerStrategy = snapshotTriggerStrategy;
+    }
+
+    public SnapshotTriggerStrategy getSnapshotTriggerStrategy() {
+        return snapshotTriggerStrategy;
     }
 }
