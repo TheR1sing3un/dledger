@@ -19,37 +19,42 @@ package io.openmessaging.storage.dledger.snapshot.strategy.impl;
 import io.openmessaging.storage.dledger.entry.DLedgerEntry;
 import io.openmessaging.storage.dledger.snapshot.SnapshotMeta;
 import io.openmessaging.storage.dledger.snapshot.strategy.SnapshotTriggerStrategy;
-import java.util.concurrent.TimeUnit;
 
-public class TimingSnapshotTriggerStrategy implements SnapshotTriggerStrategy {
+public class BytesNumSnapshotTriggerStrategy implements SnapshotTriggerStrategy {
 
-    private final long timingMs;
+    public static final long DEFAULT_BYTES_THRESHOLD = 512 * 1024 * 1024;
 
-    private long lastSnapshotTime;
+    private final long bytesThreshold;
 
-    private TimingSnapshotTriggerStrategy(long timingMs) {
-        this.timingMs = timingMs;
+    private long firstEntryPos = 0;
+
+    private long nextEntryPos = 0;
+
+    private BytesNumSnapshotTriggerStrategy(long bytesThreshold) {
+        this.bytesThreshold = bytesThreshold;
     }
 
-    public static TimingSnapshotTriggerStrategy of(long duration, TimeUnit unit) {
-        return new TimingSnapshotTriggerStrategy(unit.toMillis(duration));
+    public static BytesNumSnapshotTriggerStrategy of() {
+        return new BytesNumSnapshotTriggerStrategy(DEFAULT_BYTES_THRESHOLD);
+    }
+
+    public static BytesNumSnapshotTriggerStrategy of(long bytesThreshold) {
+        return new BytesNumSnapshotTriggerStrategy(bytesThreshold);
     }
 
     @Override
     public void loadStateWhenCommit(DLedgerEntry dLedgerEntry) {
-        // we regard the first commit as the first snapshot time
-        if (this.lastSnapshotTime == 0) {
-            this.lastSnapshotTime = System.currentTimeMillis();
-        }
+        this.nextEntryPos = dLedgerEntry.getPos() + dLedgerEntry.getSize();
     }
 
     @Override
     public void loadStateWhenSnapshotUpdate(SnapshotMeta snapshotMeta) {
-        this.lastSnapshotTime = System.currentTimeMillis();
+        this.firstEntryPos = snapshotMeta.getAfterSnapshotNextEntryPos();
+        this.nextEntryPos = this.firstEntryPos;
     }
 
     @Override
     public boolean triggerSnapshot(DLedgerEntry dLedgerEntry) {
-        return System.currentTimeMillis() - lastSnapshotTime > timingMs;
+        return this.nextEntryPos - this.firstEntryPos > this.bytesThreshold;
     }
 }

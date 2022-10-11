@@ -73,8 +73,8 @@ class StateMachineCallerTest extends ServerTestHarness {
                 SnapshotManager.SNAPSHOT_DIR_PREFIX + fsm.getAppliedIndex() + File.separator +
                 SnapshotManager.SNAPSHOT_META_FILE);
         SnapshotMeta snapshotMetaFromJSON = JSON.parseObject(snapshotMetaJSON, SnapshotMeta.class);
-        assertEquals(snapshotMetaFromJSON.getLastIncludedIndex(), 9);
-        assertEquals(snapshotMetaFromJSON.getLastIncludedTerm(), 0);
+        assertEquals(snapshotMetaFromJSON.getLastIncludedEntryIndex(), 9);
+        assertEquals(snapshotMetaFromJSON.getLastIncludedEntryTerm(), 0);
         String snapshotData = IOUtils.file2String(this.config.getSnapshotStoreBaseDir() + File.separator +
                 SnapshotManager.SNAPSHOT_DIR_PREFIX + fsm.getAppliedIndex() + File.separator + SnapshotManager.SNAPSHOT_DATA_FILE);
         assertEquals(Long.parseLong(snapshotData), 10);
@@ -95,7 +95,7 @@ class StateMachineCallerTest extends ServerTestHarness {
 
         final long lastIncludedIndex = 10;
         String snapshotStoreBasePath = this.config.getSnapshotStoreBaseDir() + File.separator + SnapshotManager.SNAPSHOT_DIR_PREFIX + lastIncludedIndex;
-        SnapshotMeta snapshotMeta = new SnapshotMeta(lastIncludedIndex, 1);
+        SnapshotMeta snapshotMeta = new SnapshotMeta(lastIncludedIndex, 1, 0);
         IOUtils.string2File(JSON.toJSONString(snapshotMeta), snapshotStoreBasePath + File.separator + SnapshotManager.SNAPSHOT_META_FILE);
         IOUtils.string2File("90", snapshotStoreBasePath + File.separator + SnapshotManager.SNAPSHOT_DATA_FILE);
 

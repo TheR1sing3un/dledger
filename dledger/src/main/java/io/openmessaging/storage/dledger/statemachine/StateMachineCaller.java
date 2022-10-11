@@ -224,8 +224,8 @@ public class StateMachineCaller extends ServiceThread {
             return;
         }
         // Compare snapshot meta with the last applied index and term
-        long snapshotIndex = snapshotMeta.getLastIncludedIndex();
-        long snapshotTerm = snapshotMeta.getLastIncludedTerm();
+        long snapshotIndex = snapshotMeta.getLastIncludedEntryIndex();
+        long snapshotTerm = snapshotMeta.getLastIncludedEntryTerm();
         if (lastAppliedCompareToSnapshot(snapshotIndex, snapshotTerm) > 0) {
             logger.warn("The snapshot loading is expired");
             loadSnapshotAfter.doCallBack(SnapshotStatus.EXPIRED);
@@ -244,8 +244,8 @@ public class StateMachineCaller extends ServiceThread {
             return;
         }
         // Update statemachine info
-        this.lastAppliedIndex.set(snapshotMeta.getLastIncludedIndex());
-        this.lastAppliedTerm = snapshotMeta.getLastIncludedTerm();
+        this.lastAppliedIndex.set(snapshotMeta.getLastIncludedEntryIndex());
+        this.lastAppliedTerm = snapshotMeta.getLastIncludedEntryTerm();
         loadSnapshotAfter.registerSnapshotMeta(snapshotMeta);
         loadSnapshotAfter.doCallBack(SnapshotStatus.SUCCESS);
     }
@@ -263,7 +263,7 @@ public class StateMachineCaller extends ServiceThread {
     private void doSnapshotSave(SaveSnapshotHook saveSnapshotAfter) {
         // Build and save snapshot meta
         DLedgerEntry curEntry = saveSnapshotAfter.getSnapshotEntry();
-        saveSnapshotAfter.registerSnapshotMeta(new SnapshotMeta(curEntry.getIndex(), curEntry.getTerm()));
+        saveSnapshotAfter.registerSnapshotMeta(new SnapshotMeta(curEntry.getIndex(), curEntry.getTerm(), curEntry.getPos() + curEntry.getSize()));
         SnapshotWriter writer = saveSnapshotAfter.getSnapshotWriter();
         if (writer == null) {
             return;

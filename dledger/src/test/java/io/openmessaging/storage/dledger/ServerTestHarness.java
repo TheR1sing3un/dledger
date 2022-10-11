@@ -17,6 +17,7 @@
 package io.openmessaging.storage.dledger;
 
 import io.openmessaging.storage.dledger.client.DLedgerClient;
+import io.openmessaging.storage.dledger.snapshot.strategy.impl.EntryNumSnapshotTriggerStrategy;
 import io.openmessaging.storage.dledger.statemachine.MockStateMachine;
 import io.openmessaging.storage.dledger.util.FileTestUtil;
 import java.io.File;
@@ -79,7 +80,7 @@ public class ServerTestHarness extends ServerTestBase {
         config.group(group).selfId(selfId).peers(peers);
         config.setStoreBaseDir(FileTestUtil.TEST_BASE + File.separator + group);
         config.setStoreType(storeType);
-        config.setSnapshotThreshold(snapshotThreshold);
+        config.setSnapshotTriggerStrategy(EntryNumSnapshotTriggerStrategy.of(snapshotThreshold));
         config.setMappedFileSizeForEntryData(mappedFileSizeForEntryData);
         config.setEnableLeaderElector(false);
         config.setEnableDiskForceClean(false);

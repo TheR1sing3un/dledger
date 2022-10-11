@@ -18,7 +18,7 @@ public class SnapshotWriterTest {
         final long lastSnapshotIndex = 10;
         SnapshotWriter writer = new FileSnapshotWriter(FileTestUtil.TEST_BASE + File.separator + "tmp", new FileSnapshotStore(FileTestUtil.TEST_BASE));
 
-        SnapshotMeta snapshotMeta = new SnapshotMeta(lastSnapshotIndex, 0);
+        SnapshotMeta snapshotMeta = new SnapshotMeta(lastSnapshotIndex, 0, 0);
         writer.setSnapshotMeta(snapshotMeta);
         writer.save(SnapshotStatus.SUCCESS);
 

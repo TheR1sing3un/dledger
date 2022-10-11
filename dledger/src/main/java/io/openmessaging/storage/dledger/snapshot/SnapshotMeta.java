@@ -18,35 +18,43 @@ package io.openmessaging.storage.dledger.snapshot;
 
 public class SnapshotMeta {
 
-    private long lastIncludedIndex;
-    private long lastIncludedTerm;
+    private long lastIncludedEntryIndex;
+    private long lastIncludedEntryTerm;
 
-    public SnapshotMeta(long lastIncludedIndex, long lastIncludedTerm) {
-        this.lastIncludedIndex = lastIncludedIndex;
-        this.lastIncludedTerm = lastIncludedTerm;
+    private long afterSnapshotNextEntryPos;
+
+    public SnapshotMeta(long lastIncludedEntryIndex, long lastIncludedTerm, long afterSnapshotNextEntryPos) {
+        this.lastIncludedEntryIndex = lastIncludedEntryIndex;
+        this.lastIncludedEntryTerm = lastIncludedTerm;
+        this.afterSnapshotNextEntryPos = afterSnapshotNextEntryPos;
     }
 
-    public long getLastIncludedIndex() {
-        return lastIncludedIndex;
+    public long getLastIncludedEntryIndex() {
+        return lastIncludedEntryIndex;
     }
 
-    public void setLastIncludedIndex(int lastIncludedIndex) {
-        this.lastIncludedIndex = lastIncludedIndex;
+    public void setLastIncludedEntryIndex(int lastIncludedEntryIndex) {
+        this.lastIncludedEntryIndex = lastIncludedEntryIndex;
     }
 
-    public long getLastIncludedTerm() {
-        return lastIncludedTerm;
+    public long getLastIncludedEntryTerm() {
+        return lastIncludedEntryTerm;
     }
 
-    public void setLastIncludedTerm(int lastIncludedTerm) {
-        this.lastIncludedTerm = lastIncludedTerm;
+    public void setLastIncludedEntryTerm(int lastIncludedEntryTerm) {
+        this.lastIncludedEntryTerm = lastIncludedEntryTerm;
+    }
+
+    public long getAfterSnapshotNextEntryPos() {
+        return afterSnapshotNextEntryPos;
     }
 
     @Override
     public String toString() {
         return "SnapshotMeta{" +
-                "lastIncludedIndex=" + lastIncludedIndex +
-                ", lastIncludedTerm=" + lastIncludedTerm +
-                '}';
+            "lastIncludedEntryIndex=" + lastIncludedEntryIndex +
+            ", lastIncludedEntryTerm=" + lastIncludedEntryTerm +
+            ", afterSnapshotNextEntryPos=" + afterSnapshotNextEntryPos +
+            '}';
     }
 }

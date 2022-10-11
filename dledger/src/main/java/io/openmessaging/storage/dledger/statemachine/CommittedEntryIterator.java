@@ -35,6 +35,8 @@ public class CommittedEntryIterator implements Iterator<DLedgerEntry> {
     private long currentIndex;
     private int completeAckNums = 0;
 
+    private long totalBytes = 0;
+
     public CommittedEntryIterator(final DLedgerStore dLedgerStore, final long committedIndex,
         final AtomicLong applyingIndex, final long lastAppliedIndex,
         final Function<Long, Boolean> completeEntryCallback) {
@@ -44,6 +46,11 @@ public class CommittedEntryIterator implements Iterator<DLedgerEntry> {
         this.firstApplyingIndex = lastAppliedIndex + 1;
         this.currentIndex = lastAppliedIndex;
         this.completeEntryCallback = completeEntryCallback;
+        initTotalBytes();
+    }
+
+    private void initTotalBytes() {
+
     }
 
     @Override

@@ -96,7 +96,7 @@ public class DLedgerConfig {
     private int snapshotThreshold = 1000;
     private int maxSnapshotReservedNum = 3;
 
-    private SnapshotTriggerStrategy snapshotTriggerStrategy = EntryNumSnapshotTriggerStrategy.of(snapshotThreshold);
+    private SnapshotTriggerStrategy snapshotTriggerStrategy = EntryNumSnapshotTriggerStrategy.of();
 
     public String getDefaultPath() {
         return storeBaseDir + File.separator + "dledger-" + selfId;

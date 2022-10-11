@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 public class SnapshotReaderTest {
 
@@ -17,7 +16,7 @@ public class SnapshotReaderTest {
     public void testReaderLoad() throws IOException {
         String metaFilePath = FileTestUtil.TEST_BASE + File.separator + SnapshotManager.SNAPSHOT_META_FILE;
         try {
-            SnapshotMeta snapshotMeta = new SnapshotMeta(10, 0);
+            SnapshotMeta snapshotMeta = new SnapshotMeta(10, 0, 0);
             IOUtils.string2File(JSON.toJSONString(snapshotMeta), metaFilePath);
 
             SnapshotReader reader = new FileSnapshotReader(FileTestUtil.TEST_BASE);

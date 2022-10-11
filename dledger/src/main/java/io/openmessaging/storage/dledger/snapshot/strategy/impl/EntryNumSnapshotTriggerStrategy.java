@@ -22,6 +22,8 @@ import io.openmessaging.storage.dledger.snapshot.strategy.SnapshotTriggerStrateg
 
 public class EntryNumSnapshotTriggerStrategy implements SnapshotTriggerStrategy {
 
+    public static final int DEFAULT_SNAPSHOT_THRESHOLD = 1000;
+
     private final int snapshotThreshold;
 
     private long lastSnapshotIndex;
@@ -36,6 +38,10 @@ public class EntryNumSnapshotTriggerStrategy implements SnapshotTriggerStrategy 
         return new EntryNumSnapshotTriggerStrategy(snapshotThreshold);
     }
 
+    public static EntryNumSnapshotTriggerStrategy of() {
+        return new EntryNumSnapshotTriggerStrategy(DEFAULT_SNAPSHOT_THRESHOLD);
+    }
+
     @Override
     public void loadStateWhenCommit(DLedgerEntry dLedgerEntry) {
 
@@ -43,8 +49,8 @@ public class EntryNumSnapshotTriggerStrategy implements SnapshotTriggerStrategy 
 
     @Override
     public void loadStateWhenSnapshotUpdate(SnapshotMeta snapshotMeta) {
-        this.lastSnapshotIndex = snapshotMeta.getLastIncludedIndex();
-        this.lastSnapshotTerm = snapshotMeta.getLastIncludedTerm();
+        this.lastSnapshotIndex = snapshotMeta.getLastIncludedEntryIndex();
+        this.lastSnapshotTerm = snapshotMeta.getLastIncludedEntryTerm();
     }
 
     @Override

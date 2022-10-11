@@ -1,6 +1,5 @@
 package io.openmessaging.storage.dledger.snapshot;
 
-import com.alibaba.fastjson.JSON;
 import io.openmessaging.storage.dledger.snapshot.file.FileSnapshotStore;
 import io.openmessaging.storage.dledger.util.FileTestUtil;
 import io.openmessaging.storage.dledger.utils.IOUtils;
@@ -19,7 +18,7 @@ public class SnapshotStoreTest {
             FileSnapshotStore writerStore = new FileSnapshotStore(FileTestUtil.TEST_BASE);
             SnapshotWriter writer = writerStore.createSnapshotWriter();
             Assertions.assertNotNull(writer);
-            SnapshotMeta writerMeta = new SnapshotMeta(lastSnapshotIndex, 0);
+            SnapshotMeta writerMeta = new SnapshotMeta(lastSnapshotIndex, 0, 0);
             writer.setSnapshotMeta(writerMeta);
             writer.save(SnapshotStatus.SUCCESS);
 
