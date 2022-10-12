@@ -26,7 +26,7 @@ public class EntryNumSnapshotTriggerStrategy implements SnapshotTriggerStrategy 
 
     private final int snapshotThreshold;
 
-    private long lastSnapshotIndex;
+    private long lastSnapshotIndex = -1;
 
     private long lastSnapshotTerm;
 
@@ -55,6 +55,6 @@ public class EntryNumSnapshotTriggerStrategy implements SnapshotTriggerStrategy 
 
     @Override
     public boolean triggerSnapshot(DLedgerEntry dLedgerEntry) {
-        return dLedgerEntry.getIndex() - this.lastSnapshotIndex > this.snapshotThreshold;
+        return dLedgerEntry.getIndex() - this.lastSnapshotIndex >= this.snapshotThreshold;
     }
 }

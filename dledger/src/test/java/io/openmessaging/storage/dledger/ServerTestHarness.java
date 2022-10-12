@@ -17,6 +17,7 @@
 package io.openmessaging.storage.dledger;
 
 import io.openmessaging.storage.dledger.client.DLedgerClient;
+import io.openmessaging.storage.dledger.snapshot.strategy.SnapshotTriggerStrategy;
 import io.openmessaging.storage.dledger.snapshot.strategy.impl.EntryNumSnapshotTriggerStrategy;
 import io.openmessaging.storage.dledger.statemachine.MockStateMachine;
 import io.openmessaging.storage.dledger.util.FileTestUtil;
@@ -76,11 +77,17 @@ public class ServerTestHarness extends ServerTestBase {
 
     protected synchronized DLedgerServer launchServerWithStateMachine(String group, String peers, String selfId, String leaderId,
                                                       String storeType, int snapshotThreshold, int mappedFileSizeForEntryData) {
+        return this.launchServerWithStateMachine(group, peers, selfId, leaderId, storeType,
+            EntryNumSnapshotTriggerStrategy.of(snapshotThreshold), mappedFileSizeForEntryData);
+    }
+
+    protected synchronized DLedgerServer launchServerWithStateMachine(String group, String peers, String selfId, String leaderId,
+        String storeType, SnapshotTriggerStrategy triggerStrategy, int mappedFileSizeForEntryData) {
         DLedgerConfig config = new DLedgerConfig();
         config.group(group).selfId(selfId).peers(peers);
         config.setStoreBaseDir(FileTestUtil.TEST_BASE + File.separator + group);
         config.setStoreType(storeType);
-        config.setSnapshotTriggerStrategy(EntryNumSnapshotTriggerStrategy.of(snapshotThreshold));
+        config.setSnapshotTriggerStrategy(triggerStrategy);
         config.setMappedFileSizeForEntryData(mappedFileSizeForEntryData);
         config.setEnableLeaderElector(false);
         config.setEnableDiskForceClean(false);

@@ -189,7 +189,7 @@ public class SnapshotManager implements SnapshotTriggerStrategy {
 
     private void truncatePrefix(DLedgerEntry entry) {
         deleteExpiredSnapshot();
-        this.dLedgerServer.getFsmCaller().getdLedgerStore().resetOffsetAfterSnapshot(entry);
+        this.dLedgerServer.getDLedgerStore().resetOffsetAfterSnapshot(entry);
     }
 
     private void deleteExpiredSnapshot() {

@@ -50,6 +50,6 @@ public class TimingSnapshotTriggerStrategy implements SnapshotTriggerStrategy {
 
     @Override
     public boolean triggerSnapshot(DLedgerEntry dLedgerEntry) {
-        return System.currentTimeMillis() - lastSnapshotTime > timingMs;
+        return System.currentTimeMillis() - lastSnapshotTime >= timingMs;
     }
 }
